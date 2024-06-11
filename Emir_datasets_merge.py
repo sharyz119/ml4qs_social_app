@@ -89,6 +89,15 @@ baro_df1 = baro_df1.append(baro_df2, ignore_index=True)
 # gyro_df1.to_csv(my_path+"/"+"all_gyroscope.csv", index = False)
 # baro_df1.to_csv(my_path+"/"+"all_barometer.csv", index = False)
 
+# accel.to_parquet(my_path+"/"+"all_acceleration.parquet.gzip",
+#               compression='gzip')
+# lin_accel.to_parquet(my_path+"/"+"all_lin_acceleration.parquet.gzip",
+#               compression='gzip')
+# gyro.to_parquet(my_path+"/"+"all_gyroscope.parquet.gzip",
+#               compression='gzip')
+# baro.to_parquet(my_path+"/"+"all_barometer.parquet.gzip",
+#               compression='gzip')
+
 # accel = pd.read_csv(my_path+"/"+"all_acceleration.csv")
 # lin_accel = pd.read_csv(my_path+"/"+"all_lin_acceleration.csv")
 # gyro = pd.read_csv(my_path+"/"+"all_gyroscope.csv")
