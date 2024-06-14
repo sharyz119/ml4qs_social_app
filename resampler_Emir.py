@@ -1,13 +1,7 @@
-import numpy as np
 import pandas as pd
-import os
-from os import listdir
-from os.path import isfile, join
-import zipfile
-import matplotlib.pyplot as plt
-import seaborn as sns 
+from feature_engineering_Emir import fourier_transformer
 
-def resampler(some_df, rate='50L', method="downscale"):
+def resampler(some_df, rate='50L', method="downscale", expand_features = True, acceleretor_fourier = False):
     pd.options.mode.chained_assignment = None #remove the annoying warning
     
     # Create an empty DataFrame to store resampled data
@@ -24,10 +18,23 @@ def resampler(some_df, rate='50L', method="downscale"):
         
         # Set "time" as the index
         group_df.set_index('time', inplace=True)
-
+        resampled_group = pd.DataFrame()
         if method=="downscale" or method=="d":
             # Resample the data to the specified frequency, and choose the extreme value always
-            resampled_group = group_df.drop(columns=['source_name']).resample(rate).apply(lambda x: max(x, key=abs)).interpolate()
+           if expand_features:
+            my_col_names = group_df.drop(columns=['source_name']).columns
+            resampling = group_df.drop(columns=['source_name']).resample(rate)
+            resampled_group[[x+"_max" for x in my_col_names]] = resampling.max().interpolate()
+            resampled_group[[x+"_min" for x in my_col_names]] = resampling.min().interpolate()
+            resampled_group[[x+"_sd" for x in my_col_names]] = resampling.std().interpolate()
+            resampled_group[[x+"_mean" for x in my_col_names]] = resampling.mean().interpolate()
+            if acceleretor_fourier:
+                tmp = resampling.apply(lambda x : fourier_transformer(x, sampling_interval=float(''.join(filter(str.isdigit, rate)))*0.001))
+                resampled_group[[x+"_dominant_freq" for x in my_col_names]] = tmp.applymap(lambda x: x[0])
+                resampled_group[[x+"_avg_weigh_freq" for x in my_col_names]] = tmp.applymap(lambda x: x[1])
+           else:
+                resampled_group = group_df.drop(columns=['source_name']).resample(rate).apply(lambda x: max(x, key=abs)).interpolate()
+           
         elif method == "upscale" or method=='u':
             resampled_group = group_df.drop(columns=['source_name']).resample(rate).ffill()
         #put back the source_name to the dataframe
