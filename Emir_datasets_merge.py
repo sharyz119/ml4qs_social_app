@@ -6,6 +6,7 @@ from os.path import isfile, join
 import zipfile
 import matplotlib.pyplot as plt
 import seaborn as sns 
+from feature_engineering_Emir import zscore_standardize_columns
 
 my_path = "C:/Users/ameer/Desktop/AI/ML4QS/Our data"
 
@@ -121,6 +122,19 @@ baro_resampled["index"] = indexing_func(baro_resampled)
 merged_df = pd.merge(accel_resampled, lin_accel_resampled, on=['index', 'source_name'], suffixes=('_accel', '_linaccel'))
 merged_df = pd.merge(merged_df, gyro_resampled, on=['index', 'source_name'], suffixes=('_mergedpre', '_gyro'))
 merged_df = pd.merge(merged_df, baro_resampled, on=['index', 'source_name'], suffixes=('_mergedpost', '_baro'))
+
+#For some reason, the gyroscope reddit2 dataset is not saving values, this saves the values manually to the dataset
+
+NA_cols = ["gyro_zscore_x_max","gyro_zscore_y_max", "gyro_zscore_z_max","gyro_zscore_x_min",
+           "gyro_zscore_y_min", "gyro_zscore_z_min", "gyro_zscore_x_sd", "gyro_zscore_y_sd",
+           "gyro_zscore_z_sd", "gyro_zscore_x_mean", "gyro_zscore_y_mean", "gyro_zscore_z_mean"]
+
+new_df_names = [s.replace("gyro_", "") for s in NA_cols]
+modified_strings = [s.replace("gyro_zscore_", "") for s in NA_cols]
+gyro_zscores = zscore_standardize_columns(gyro_resampled[gyro_resampled["source_name"]=="Reddit2"][["source_name","time"]+modified_strings][0:5955]).drop(columns=["source_name","time"])
+gyro_zscores.rename(columns=dict(zip(new_df_names, NA_cols)), inplace=True)
+gyro_zscores.index = merged_df[merged_df["source_name"]=="Reddit2"][NA_cols].index
+merged_df.loc[merged_df["source_name"]=="Reddit2", NA_cols] = gyro_zscores
 
 # my_path = "C:/Users/ameer/Desktop/AI/ML4QS/ml4qs_social_app/Emir_Datasets"
 
