@@ -18,7 +18,7 @@ testing_df = full_data[full_data["source_name"].isin(testing_set)]
 training_df = full_data[~full_data["source_name"].isin(testing_set)]
 
 #only select standardized columns
-columns_to_select = [col for col in full_data.columns if 'zscore' in col]+["SM_platform", "index"]
+columns_to_select = [col for col in full_data.columns if 'zscore' in col]+["SM_platform", "index"]+[col for col in full_data.columns if 'pc' in col]
 training_df = training_df.loc[:,columns_to_select]
 testing_df = testing_df.loc[:,columns_to_select]
 param_grid = { 
